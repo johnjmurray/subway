@@ -30,7 +30,19 @@ class station():
         self.lat = lat
         self.lon = lon
         self.exp = exp_flag
-		
+
+def add_train_to_current(t):
+	current_trains[t] = train(t, flushing,0)
+	
+	
+def plot_trains():
+	for train_ii in current_trains:
+		current_trains[train_ii].move()
+		plt.plot(current_trains[train_ii].loc[1],current_trains[train_ii].loc[0],'go')
+		plt.axis([-74.027,-73.761,40.572,40.870])
+		plt.pause(0.1)
+	plt.plot(station_lons_south,station_lats_south)
+	plt.show(block=True)
 		
 midnight = 0
 zero_time = midnight
@@ -92,13 +104,7 @@ while iter_time < start_times_south[len(start_times_south)-1]+trip_durations_sou
 			del current_trains[start_time]
 			
 	
-	for train_ii in current_trains:
-		current_trains[train_ii].move()
-		plt.plot(current_trains[train_ii].loc[1],current_trains[train_ii].loc[0],'go')
-		plt.axis([-74.027,-73.761,40.572,40.870])
-		plt.pause(0.1)
-	plt.plot(station_lons_south,station_lats_south)
-	plt.show(block=True)
+	
 	#time.sleep(0.25)
 	iter_time+=time_step
 	print('%02d:%02d'%(int(np.floor(iter_time/60)),iter_time%60))
