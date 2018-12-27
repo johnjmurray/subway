@@ -35,6 +35,10 @@ def add_train_to_current(t):
 	current_trains[t] = train(t, flushing,0)
 
 
+def format_time(value):
+	return '{:02d}:{:02d}'.format(*divmod(value, 60))
+
+
 midnight = 0
 zero_time = midnight
 time_step = 1 # 6 seconds
@@ -97,28 +101,33 @@ def train_gen():
 				current_trains[start_time] = Train(start_time,flushing,0)
 			elif iter_time > start_time+trip_durations_south[-1] and start_time in current_trains:
 				del current_trains[start_time]
-		yield current_trains
+		yield iter_time, current_trains
+
 		iter_time += time_step
-		print('{:02d}:{:02d}'.format(*divmod(iter_time, 60)))
 
 
 fig = plt.figure()
 ax = plt.axes(xlim=(-74.027,-73.761),ylim=(40.572,40.870))
-scat = plt.scatter(0,0)
+scat = ax.scatter(0,0)
+time_text = ax.text(x=-73.8, y=40.6, s='', fontsize=16)
 line, = ax.plot(route_lons, route_lats, lw=2)
 
 
-def animate(current_trains):
+def animate(inputs):
 	"""Set the data for one frame of the animation.
 
 	Parameters
 	----------
-	current_trains: dictionary of `Train` instances.
+	inputs: sequence of two items: iteration time and
+		dictionary of `Train` instances.
 
 	Returns
 	-------
-	Updated scatterplot.
+	Updated matplotlib objects.
 	"""
+	time_now, current_trains = inputs
+	time_text.set_text(format_time(time_now))
+
 	coords = []
 	for train_ii in current_trains.values():
 		this_x = train_ii.loc[1]
@@ -127,7 +136,7 @@ def animate(current_trains):
 		train_ii.move()
 	if coords:
 		scat.set_offsets(coords)
-	return scat,
+	return scat, time_text
 
 
 ani = animation.FuncAnimation(fig=fig, func=animate, frames=train_gen(), interval=200, blit=True)
